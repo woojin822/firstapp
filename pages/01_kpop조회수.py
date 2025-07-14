@@ -1,55 +1,21 @@
-import requests
-import re
-from html import unescape
 import plotly.graph_objects as go
 
-def search_kpop_top_videos(keyword="kpop music video", max_results=10):
-    query = keyword.replace(" ", "+")
-    url = f"https://www.youtube.com/results?search_query={query}"
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code != 200:
-        print("유튜브 페이지를 불러올 수 없습니다.")
-        return []
+# ✅ 더미 데이터 (실제 K-pop 유튜브 인기 영상 Top 10 예시)
+def get_dummy_kpop_data():
+    return [
+        ("PSY - Gangnam Style", "https://youtu.be/9bZkp7q19f0", 5600000000),
+        ("BLACKPINK - DDU-DU DDU-DU", "https://youtu.be/IHNzOHi8sJs", 2310000000),
+        ("BLACKPINK - Kill This Love", "https://youtu.be/2S24-y0Ij3Y", 2110000000),
+        ("BTS - Dynamite", "https://youtu.be/gdZLi9oWNZg", 1960000000),
+        ("BTS - Boy With Luv", "https://youtu.be/XsX3ATc3FbA", 1860000000),
+        ("BLACKPINK - BOOMBAYAH", "https://youtu.be/bwmSjveL3Lc", 1790000000),
+        ("PSY - Gentleman", "https://youtu.be/ASO_zypdnsQ", 1680000000),
+        ("BTS - DNA", "https://youtu.be/MBdVXkSdhwU", 1620000000),
+        ("BTS - MIC Drop Remix", "https://youtu.be/kTlv5_Bs8aw", 1500000000),
+        ("TWICE - TT", "https://youtu.be/ePpPVE-GGJw", 700000000)
+    ]
 
-    html = response.text
-    video_blocks = re.findall(r'{"videoRenderer":(.*?)},"trackingParams"', html)
-
-    videos = []
-    seen_ids = set()
-
-    for block in video_blocks:
-        try:
-            title_match = re.search(r'"title":\{"runs":\[\{"text":"(.*?)"\}', block)
-            title = unescape(title_match.group(1)) if title_match else "제목 없음"
-
-            vid_match = re.search(r'"videoId":"(.*?)"', block)
-            video_id = vid_match.group(1)
-
-            # 중복 제거
-            if video_id in seen_ids:
-                continue
-            seen_ids.add(video_id)
-
-            url = f"https://www.youtube.com/watch?v={video_id}"
-
-            views_match = re.search(r'"viewCountText":\{"simpleText":"([\d,]+) views"\}', block)
-            views = views_match.group(1).replace(",", "")
-            views_int = int(views) if views.isdigit() else 0
-
-            videos.append((title, url, views_int))
-
-        except Exception:
-            continue
-
-        if len(videos) >= max_results:
-            break
-
-    return videos
-
+# ✅ 시각화 함수
 def plot_top_videos(videos):
     titles = [v[0] for v in videos]
     views = [v[2] for v in videos]
@@ -77,10 +43,7 @@ def plot_top_videos(videos):
 
     fig.show()
 
-# 실행
+# ✅ 실행
 if __name__ == "__main__":
-    results = search_kpop_top_videos()
-    if results:
-        plot_top_videos(results)
-    else:
-        print("영상을 불러오지 못했습니다.")
+    videos = get_dummy_kpop_data()
+    plot_top_videos(videos)
