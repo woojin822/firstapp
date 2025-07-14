@@ -3,7 +3,7 @@ import re
 from html import unescape
 import plotly.graph_objects as go
 
-def search_kpop_top_videos(keyword="kpop music video", max_results=5):
+def search_kpop_top_videos(keyword="kpop music video", max_results=10):
     query = keyword.replace(" ", "+")
     url = f"https://www.youtube.com/results?search_query={query}"
     headers = {
@@ -19,6 +19,8 @@ def search_kpop_top_videos(keyword="kpop music video", max_results=5):
     video_blocks = re.findall(r'{"videoRenderer":(.*?)},"trackingParams"', html)
 
     videos = []
+    seen_ids = set()
+
     for block in video_blocks:
         try:
             title_match = re.search(r'"title":\{"runs":\[\{"text":"(.*?)"\}', block)
@@ -26,6 +28,12 @@ def search_kpop_top_videos(keyword="kpop music video", max_results=5):
 
             vid_match = re.search(r'"videoId":"(.*?)"', block)
             video_id = vid_match.group(1)
+
+            # 중복 제거
+            if video_id in seen_ids:
+                continue
+            seen_ids.add(video_id)
+
             url = f"https://www.youtube.com/watch?v={video_id}"
 
             views_match = re.search(r'"viewCountText":\{"simpleText":"([\d,]+) views"\}', block)
@@ -53,17 +61,18 @@ def plot_top_videos(videos):
             y=views,
             text=[f"<a href='{url}'>{title}</a>" for title, url in zip(titles, urls)],
             hovertemplate='%{text}<br>조회수: %{y:,}회<extra></extra>',
-            marker_color='lightsalmon'
+            marker_color='mediumturquoise'
         )
     ])
 
     fig.update_layout(
-        title="🔥 유튜브 K-pop 인기 영상 TOP 5",
+        title="🔥 유튜브 K-pop 인기 영상 TOP 10",
         xaxis_title="영상 제목",
         yaxis_title="조회수",
         xaxis_tickangle=-30,
         hoverlabel=dict(bgcolor="white", font_size=12, font_family="Arial"),
-        template="plotly_white"
+        template="plotly_white",
+        height=600
     )
 
     fig.show()
