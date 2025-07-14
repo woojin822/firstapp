@@ -1,6 +1,7 @@
+import streamlit as st
 import plotly.graph_objects as go
 
-# ✅ 더미 데이터 (실제 K-pop 유튜브 인기 영상 Top 10 예시)
+# ✅ 더미 데이터
 def get_dummy_kpop_data():
     return [
         ("PSY - Gangnam Style", "https://youtu.be/9bZkp7q19f0", 5600000000),
@@ -15,8 +16,8 @@ def get_dummy_kpop_data():
         ("TWICE - TT", "https://youtu.be/ePpPVE-GGJw", 700000000)
     ]
 
-# ✅ 시각화 함수
-def plot_top_videos(videos):
+# ✅ Plotly 그래프 생성 함수
+def create_plot(videos):
     titles = [v[0] for v in videos]
     views = [v[2] for v in videos]
     urls = [v[1] for v in videos]
@@ -27,7 +28,7 @@ def plot_top_videos(videos):
             y=views,
             text=[f"<a href='{url}'>{title}</a>" for title, url in zip(titles, urls)],
             hovertemplate='%{text}<br>조회수: %{y:,}회<extra></extra>',
-            marker_color='mediumturquoise'
+            marker_color='lightsalmon'
         )
     ])
 
@@ -36,14 +37,17 @@ def plot_top_videos(videos):
         xaxis_title="영상 제목",
         yaxis_title="조회수",
         xaxis_tickangle=-30,
-        hoverlabel=dict(bgcolor="white", font_size=12, font_family="Arial"),
+        hoverlabel=dict(bgcolor="white", font_size=12),
         template="plotly_white",
         height=600
     )
 
-    fig.show()
+    return fig
 
-# ✅ 실행
-if __name__ == "__main__":
-    videos = get_dummy_kpop_data()
-    plot_top_videos(videos)
+# ✅ Streamlit 앱 실행
+st.set_page_config(page_title="K-pop Top 10", layout="wide")
+st.title("🎵 K-pop 유튜브 영상 TOP 10 (더미 데이터 기반)")
+
+data = get_dummy_kpop_data()
+fig = create_plot(data)
+st.plotly_chart(fig, use_container_width=True)
